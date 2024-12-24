@@ -1,0 +1,33 @@
+{
+  "name": "doctor-appointment",
+  "version": "1.0.0",
+  "description": "assignment by amrutam",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ajeet-Rana/Doctor-Appointment.git"
+  },
+  "author": "Ajeet",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ajeet-Rana/Doctor-Appointment/issues"
+  },
+  "homepage": "https://github.com/Ajeet-Rana/Doctor-Appointment#readme",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.3",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-validator": "^7.2.0",
+    "express.js": "^1.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.9.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
