@@ -2,17 +2,21 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const morgan = require("morgan");
+const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const authRoutes = require("./Routes/AuthUser"); // Routes for authentication
-
+const appointmentRoutes = require("./Routes/Appointment");
 dotenv.config(); // Load environment variables from .env file
 
 const app = express();
+
 const port = process.env.PORT || 5000; // Set a default port if not specified
 
 // Middleware
 app.use(bodyParser.json()); // Parse JSON requests
-
+app.use(cookieParser());
+app.use(morgan("dev"));
 // Connect to MongoDB
 mongoose
   .connect(process.env.MONGO_URI, {
@@ -28,7 +32,7 @@ mongoose
 
 // Routes
 app.use("/api/auth", authRoutes); // Authentication routes
-
+app.use("/api/appointments", appointmentRoutes);
 // Default route
 app.get("/", (req, res) => {
   res.send("Welcome to the API");
