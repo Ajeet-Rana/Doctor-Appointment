@@ -36,7 +36,11 @@ const loginUser = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
-    res.status(200).json({ token });
+    res.cookie("token", token, {
+      httpOnly: true, // Cannot be accessed by JavaScript
+      sameSite: "Strict", // Prevents CSRF
+    });
+    return res.status(200).json({ message: "Login successful" });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
