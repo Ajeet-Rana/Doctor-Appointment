@@ -45,5 +45,44 @@ const loginUser = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+// User Information
 
-module.exports = { registerUser, loginUser };
+const getUserData = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const patient = await User.findById(id);
+    if (!patient) {
+      return res.status(404).json({ message: "Patient not found" });
+    }
+    res.status(200).json(patient);
+  } catch (error) {
+    res.status(500).json({ message: "Error retrieving patient", error });
+  }
+};
+
+// Add an amount to the user's wallet
+const addAmountToWallet = async (req, res) => {
+  const { id } = req.params;
+  const { amount } = req.body;
+
+  if (typeof amount !== "number" || amount <= 0) {
+    return res.status(400).json({ message: "Invalid amount" });
+  }
+
+  try {
+    const patient = await User.findById(id);
+    if (!patient) {
+      return res.status(404).json({ message: "Patient not found" });
+    }
+
+    patient.walletBalance += amount;
+    await patient.save();
+
+    res.status(200).json(patient);
+  } catch (error) {
+    res.status(500).json({ message: "Error updating wallet balance", error });
+  }
+};
+
+module.exports = { registerUser, loginUser, getUserData, addAmountToWallet };
