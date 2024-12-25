@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
 const Schema = mongoose.Schema;
-const userSchema = new mongoose.Schema(
+
+const doctorSchema = new Schema(
   {
     _id: {
       type: Schema.Types.ObjectId,
@@ -11,18 +11,13 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    specialty: {
+      type: String,
+      required: true,
+    },
     email: {
       type: String,
-      required: true,
-      unique: true,
-    },
-    password: {
-      type: String,
-      required: true,
-    },
-    walletBalance: {
-      type: Number,
-      default: 0,
+      required: false,
     },
     createdAt: {
       type: Date,
@@ -36,13 +31,12 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-userSchema.pre("save", async function (next) {
-  if (this.isModified("password")) {
-    this.password = await bcrypt.hash(this.password, 10);
-  }
+// Middleware to update the updatedAt field
+doctorSchema.pre("save", function (next) {
+  this.updatedAt = Date.now();
   next();
 });
 
-const User = mongoose.model("User", userSchema);
+const Doctor = mongoose.model("Doctor", doctorSchema);
 
-module.exports = User;
+module.exports = Doctor;
