@@ -6,6 +6,7 @@ function Auth() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState(""); // For Register only
   const [role, setRole] = useState("User"); // Default role is "User"
+  const [specialization, setSpecialization] = useState(""); // For Doctor only
   const [loading, setLoading] = useState(false); // For API call state
   const [error, setError] = useState(null); // For error handling
 
@@ -21,8 +22,14 @@ function Auth() {
 
       // Prepare request data based on the mode
       const requestData = isLogin
-        ? { email, password }
-        : { name, email, role, password };
+        ? { email, password, role }
+        : {
+            name,
+            email,
+            role,
+            password,
+            ...(role === "doctor" && { specialty: specialization }),
+          };
 
       // Send POST request to the backend
       const response = await fetch(endpoint, {
@@ -42,16 +49,17 @@ function Auth() {
       const result = await response.json();
       if (isLogin) {
         console.log("Token saved:", result.token);
-
         alert("Login successful");
       } else {
         alert("Registration successful");
       }
+
       // Clear form fields
       setName("");
       setEmail("");
       setPassword("");
       setRole("User");
+      setSpecialization("");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -83,9 +91,26 @@ function Auth() {
                 required
               >
                 <option value="User">User</option>
-                <option value="Doctor">Doctor</option>
+                <option value="doctor">Doctor</option>
               </select>
             </div>
+            {role === "doctor" && (
+              <div>
+                <label>Specialization:</label>
+                <select
+                  value={specialization}
+                  onChange={(e) => setSpecialization(e.target.value)}
+                  required
+                >
+                  <option value="">Select Specialization</option>
+                  <option value="Cardiology">Cardiology</option>
+                  <option value="Dermatology">Dermatology</option>
+                  <option value="Neurology">Neurology</option>
+                  <option value="Pediatrics">Pediatrics</option>
+                  <option value="Psychiatry">Psychiatry</option>
+                </select>
+              </div>
+            )}
           </>
         )}
         <div>
@@ -106,6 +131,18 @@ function Auth() {
             required
           />
         </div>
+        <div>
+          <label>Role:</label>
+          <select
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            required
+          >
+            <option value="User">User</option>
+            <option value="doctor">Doctor</option>
+          </select>
+        </div>
+
         <button type="submit" disabled={loading}>
           {loading ? "Submitting..." : isLogin ? "Login" : "Register"}
         </button>

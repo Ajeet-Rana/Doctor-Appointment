@@ -1,14 +1,20 @@
 // controllers/authController.js
 const User = require("../models/User.js");
+const Doctor = require("../models/Doctor.js");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
 // Register a new user
 const registerUser = async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password, role, specialty } = req.body;
 
   try {
-    const user = new User({ name, email, password, role });
+    let user;
+    if (role == "doctor") {
+      user = new Doctor({ name, email, password, role, specialty });
+    } else {
+      user = new User({ name, email, password, role });
+    }
     await user.save();
     res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
@@ -18,10 +24,14 @@ const registerUser = async (req, res) => {
 
 // Login a user
 const loginUser = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+    let user;
+    if (role == "doctor") user = await Doctor.findOne({ email });
+    else {
+      user = await User.findOne({ email });
+    }
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
@@ -36,6 +46,7 @@ const loginUser = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
+
     res.cookie("token", token, {
       httpOnly: true, // Cannot be accessed by JavaScript
       sameSite: "Strict", // Prevents CSRF

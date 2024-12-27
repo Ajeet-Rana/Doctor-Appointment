@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-
+const bcrypt = require("bcryptjs");
 const doctorSchema = new Schema(
   {
     _id: {
@@ -19,6 +19,10 @@ const doctorSchema = new Schema(
       type: String,
       required: false,
     },
+    password: {
+      type: String,
+      required: true,
+    },
     createdAt: {
       type: Date,
       default: Date.now,
@@ -30,10 +34,10 @@ const doctorSchema = new Schema(
   },
   { timestamps: true }
 );
-
-// Middleware to update the updatedAt field
-doctorSchema.pre("save", function (next) {
-  this.updatedAt = Date.now();
+doctorSchema.pre("save", async function (next) {
+  if (this.isModified("password")) {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
   next();
 });
 
