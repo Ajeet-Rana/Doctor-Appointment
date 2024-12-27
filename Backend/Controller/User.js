@@ -1,6 +1,7 @@
 // controllers/authController.js
 const User = require("../models/User.js");
 const Doctor = require("../models/Doctor.js");
+const Appointment = require("../models/Appoin_model.js");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
@@ -96,4 +97,37 @@ const addAmountToWallet = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, getUserData, addAmountToWallet };
+const bookAppointment = async (req, res) => {
+  const {
+    patientId,
+    doctorId,
+    appointmentDate,
+    amountCharged,
+    discountApplied,
+    status,
+  } = req.body;
+
+  try {
+    const newAppointment = new Appointment({
+      patientId,
+      doctorId,
+      appointmentDate,
+      amountCharged,
+      discountApplied,
+      status,
+    });
+
+    await newAppointment.save();
+    res.status(201).json({ message: "Appointment created successfully" });
+  } catch (error) {
+    res.status(400).json({ message: "Error creating appointment" });
+  }
+};
+
+module.exports = {
+  registerUser,
+  loginUser,
+  getUserData,
+  addAmountToWallet,
+  bookAppointment,
+};

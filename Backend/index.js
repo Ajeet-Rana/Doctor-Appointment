@@ -6,7 +6,7 @@ const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const authRoutes = require("./Routes/AuthUser"); // Routes for authentication
-const appointmentRoutes = require("./Routes/Appointment");
+
 dotenv.config(); // Load environment variables from .env file
 
 const app = express();
@@ -32,7 +32,7 @@ mongoose
 
 // Routes
 app.use("/api/auth", authRoutes); // Authentication routes
-app.use("/api/appointments", appointmentRoutes);
+
 // Default route
 app.get("/", (req, res) => {
   res.send("Welcome to the API");

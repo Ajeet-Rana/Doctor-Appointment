@@ -1,102 +1,47 @@
-import React, { useState } from "react";
+import React from "react";
+import AppointmentForm from "./AppointmentForm";
 
-function Appointment() {
-  const [name, setName] = useState("");
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
-  const [description, setDescription] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(false);
+const App = () => {
+  const createAppointment = async (appointmentData) => {
+    const endpoint = "http://localhost:5000/api/auth/patients/appointments"; // Adjust this based on your backend route
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setSuccess(false);
-
-    const appointmentData = { name, date, time, description };
+    const requestData = {
+      patientId: appointmentData.patientId,
+      doctorId: appointmentData.doctorId,
+      appointmentDate: appointmentData.appointmentDate,
+      amountCharged: appointmentData.amountCharged,
+      discountApplied: appointmentData.discountApplied,
+      status: appointmentData.status,
+    };
 
     try {
-      const response = await fetch("http://localhost:5000/api/appointments/", {
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(appointmentData),
-        credentials: "include",
+        body: JSON.stringify(requestData),
+        credentials: "include", // For handling cookies/session if needed
       });
 
-      if (!response.ok) {
+      if (response.ok) {
+        alert("Appointment created successfully");
+      } else {
         const errorData = await response.json();
-        throw new Error(errorData.message || "An error occurred");
+        alert(`Error: ${errorData.message}`);
       }
-
-      const result = await response.json();
-      setSuccess(true);
-      alert("Appointment booked successfully!");
-      // Clear the form after success
-      setName("");
-      setDate("");
-      setTime("");
-      setDescription("");
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      console.error("Error creating appointment:", error);
+      alert("Failed to create appointment");
     }
   };
 
   return (
     <div>
-      <h2>Book Appointment</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Name:</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Date:</label>
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Time:</label>
-          <input
-            type="time"
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Description:</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit" disabled={loading}>
-          {loading ? "Booking..." : "Book Appointment"}
-        </button>
-      </form>
-
-      {error && <p style={{ color: "red" }}>Error: {error}</p>}
-      {success && (
-        <p style={{ color: "green" }}>Appointment booked successfully!</p>
-      )}
+      <h1>Create Appointment</h1>
+      <AppointmentForm createAppointment={createAppointment} />
     </div>
   );
-}
+};
 
-export default Appointment;
+export default App;
