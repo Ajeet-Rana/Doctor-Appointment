@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
 const doctorSchema = new Schema(
   {
     _id: {
@@ -14,6 +16,15 @@ const doctorSchema = new Schema(
     specialty: {
       type: String,
       required: true,
+    },
+    appointmentCharge: {
+      type: Number,
+      required: true,
+      default: 30000,
+    },
+    discountGiven: {
+      type: Number,
+      default: 5000,
     },
     email: {
       type: String,
@@ -40,6 +51,11 @@ doctorSchema.pre("save", async function (next) {
   }
   next();
 });
+doctorSchema.methods.getJWTToken = function () {
+  return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+  });
+};
 
 const Doctor = mongoose.model("Doctor", doctorSchema);
 

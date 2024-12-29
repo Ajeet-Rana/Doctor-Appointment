@@ -5,9 +5,11 @@ const authenticateJWT = require("../Middleware/authenticateJWT");
 const {
   loginUser,
   registerUser,
-  getUserData,
   addAmountToWallet,
   bookAppointment,
+  logout,
+  generateFinancialReport,
+  getUserInfo,
 } = require("../Controller/User");
 const router = express.Router();
 
@@ -17,11 +19,14 @@ router.post("/register", registerUser);
 // Login route
 router.post("/login", loginUser);
 
+// User
+router.get("/logout", logout);
+
 // Patient Data route
-router.get("/patients/:id", authenticateJWT, getUserData);
+router.get("/patients-info/:id", authenticateJWT, getUserInfo);
 
-// Route to add an amount to the user's wallet
 router.patch("/patients/wallet/:id", authenticateJWT, addAmountToWallet);
-router.post("/patients/appointments", authenticateJWT, bookAppointment);
+router.post("/appointments", bookAppointment);
 
+router.get("/financial-report", generateFinancialReport);
 module.exports = router;

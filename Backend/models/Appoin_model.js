@@ -8,14 +8,12 @@ const appointmentSchema = new Schema(
       auto: true,
     },
     patientId: {
-      //type: Schema.Types.ObjectId,
-      //ref: "Patient",
-      type: String,
-      required: true,
+      type: Schema.Types.ObjectId,
+      ref: "Patient",
     },
     doctorId: {
-      //type: Schema.Types.ObjectId,
-      //ref: "Doctor",
+      type: Schema.Types.ObjectId,
+      ref: "Doctor",
       type: String,
       required: true,
     },

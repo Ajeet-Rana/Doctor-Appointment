@@ -1,7 +1,16 @@
-import React from "react";
+import DoctorList from "../Doctors/doctorData";
+import UserInfo from "./UserData";
 
-function Home() {
-  return <div>Home</div>;
-}
+const PlayerDashboard = () => {
+  return (
+    <div>
+      <h1>Player Dashboard</h1>
+      <UserInfo />
+      <DoctorList />
 
-export default Home;
+      {/* Offers Section */}
+    </div>
+  );
+};
+
+export default PlayerDashboard;

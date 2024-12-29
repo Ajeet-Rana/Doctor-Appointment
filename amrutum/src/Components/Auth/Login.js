@@ -1,69 +1,45 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useHistory } from "react-router-dom";
+import { login, register } from "../Reducer/action"; // Assuming actions are defined in a file
 
 function Auth() {
   const [isLogin, setIsLogin] = useState(true); // Toggle between Login and Register
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState(""); // For Register only
-  const [role, setRole] = useState("User"); // Default role is "User"
+  const [role, setRole] = useState("user"); // Default role is "user"
   const [specialization, setSpecialization] = useState(""); // For Doctor only
-  const [loading, setLoading] = useState(false); // For API call state
-  const [error, setError] = useState(null); // For error handling
 
-  const handleSubmit = async (e) => {
+  const dispatch = useDispatch();
+  const history = useHistory();
+  // Redux state values
+  const { loading, error, isAuthenticated } = useSelector(
+    (state) => state.user
+  );
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      history.push("/");
+    }
+  }, [isAuthenticated, history]);
+
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
 
-    try {
-      const endpoint = isLogin
-        ? "http://localhost:5000/api/auth/login"
-        : "http://localhost:5000/api/auth/register";
-
-      // Prepare request data based on the mode
-      const requestData = isLogin
-        ? { email, password, role }
-        : {
-            name,
-            email,
-            role,
-            password,
-            ...(role === "doctor" && { specialty: specialization }),
-          };
-
-      // Send POST request to the backend
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestData),
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "An error occurred");
-      }
-
-      const result = await response.json();
-      if (isLogin) {
-        console.log("Token saved:", result.token);
-        alert("Login successful");
-      } else {
-        alert("Registration successful");
-      }
-
-      // Clear form fields
-      setName("");
-      setEmail("");
-      setPassword("");
-      setRole("User");
-      setSpecialization("");
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+    if (isLogin) {
+      // Dispatch login action
+      dispatch(login(email, password, role));
+    } else {
+      // Dispatch register action
+      const userData = {
+        name,
+        email,
+        role,
+        password,
+        ...(role === "doctor" && { specialty: specialization }),
+      };
+      dispatch(register(userData));
     }
   };
 
@@ -82,17 +58,6 @@ function Auth() {
                 onChange={(e) => setName(e.target.value)}
                 required
               />
-            </div>
-            <div>
-              <label>Role:</label>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                required
-              >
-                <option value="User">User</option>
-                <option value="doctor">Doctor</option>
-              </select>
             </div>
             {role === "doctor" && (
               <div>
@@ -138,7 +103,7 @@ function Auth() {
             onChange={(e) => setRole(e.target.value)}
             required
           >
-            <option value="User">User</option>
+            <option value="user">user</option>
             <option value="doctor">Doctor</option>
           </select>
         </div>

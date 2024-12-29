@@ -17,11 +17,7 @@ const discountTrackingSchema = new Schema(
       ref: "Doctor",
       required: true,
     },
-    isDiscountUsed: {
-      type: Boolean,
-      required: true,
-      default: false,
-    },
+    
     usedAt: {
       type: Date,
       default: null,

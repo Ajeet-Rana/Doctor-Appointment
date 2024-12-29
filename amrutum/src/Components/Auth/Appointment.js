@@ -1,47 +1,56 @@
-import React from "react";
-import AppointmentForm from "./AppointmentForm";
+import React, { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { bookAppointment } from "../Reducer/action";
+import { useLocation } from "react-router-dom";
 
-const App = () => {
-  const createAppointment = async (appointmentData) => {
-    const endpoint = "http://localhost:5000/api/auth/patients/appointments"; // Adjust this based on your backend route
-
-    const requestData = {
-      patientId: appointmentData.patientId,
-      doctorId: appointmentData.doctorId,
-      appointmentDate: appointmentData.appointmentDate,
-      amountCharged: appointmentData.amountCharged,
-      discountApplied: appointmentData.discountApplied,
-      status: appointmentData.status,
+const Appointment = () => {
+  const location = useLocation();
+  const { doctor } = location.state || {};
+  const user = useSelector((state) => state.user.user);
+  const dispatch = useDispatch();
+  console.log(user);
+  const [appointmentDate, setAppointmentDate] = useState("");
+  const amountCharged = doctor.appointmentCharge;
+  const discountApplied = doctor.discountGiven;
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const appointmentData = {
+      patientId: user._id,
+      doctorId: doctor._id,
+      appointmentDate,
+      amountCharged,
+      discountApplied,
     };
-
-    try {
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestData),
-        credentials: "include", // For handling cookies/session if needed
-      });
-
-      if (response.ok) {
-        alert("Appointment created successfully");
-      } else {
-        const errorData = await response.json();
-        alert(`Error: ${errorData.message}`);
-      }
-    } catch (error) {
-      console.error("Error creating appointment:", error);
-      alert("Failed to create appointment");
-    }
+    dispatch(bookAppointment(appointmentData));
   };
+
+  if (!doctor) {
+    return <p>No doctor selected.</p>;
+  }
 
   return (
     <div>
-      <h1>Create Appointment</h1>
-      <AppointmentForm createAppointment={createAppointment} />
+      <h1>Book Appointment with Dr. {doctor.name}</h1>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Date:</label>
+          <input
+            type="date"
+            value={appointmentDate}
+            onChange={(e) => setAppointmentDate(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Amount Charged : {amountCharged}</label>
+        </div>
+        <div>
+          <label>Discount Applied : {discountApplied}</label>
+        </div>
+        <button type="submit">Book Appointment</button>
+      </form>
     </div>
   );
 };
 
-export default App;
+export default Appointment;
