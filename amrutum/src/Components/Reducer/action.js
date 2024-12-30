@@ -31,13 +31,14 @@ export const login = (email, password, role) => async (dispatch) => {
       { email, password, role },
       {
         headers: { "Content-Type": "application/json" },
-        withCredentials: true, 
+        withCredentials: true,
       }
     );
     dispatch({
       type: LOGIN_SUCCESS,
       payload: data.user,
     });
+    localStorage.setItem("userId", data.user._id);
     console.log(data.user._id);
     dispatch(fetchUserInfo(data.user._id));
   } catch (error) {
@@ -53,7 +54,7 @@ export const register = (userData) => async (dispatch) => {
 
     const { data } = await axios.post(`/api/auth/register`, userData, {
       headers: { "Content-Type": "application/json" },
-      withCredentials: true, 
+      withCredentials: true,
     });
     dispatch({
       type: REGISTER_SUCCESS,

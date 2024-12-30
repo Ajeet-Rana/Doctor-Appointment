@@ -1,15 +1,35 @@
 import DoctorList from "../Doctors/doctorData";
-import UserInfo from "./UserData";
+import "./Home.css";
+import HeroSec from "./HeroSec";
+import CardText from "./CardText";
 
 const PlayerDashboard = () => {
   return (
-    <div>
-      <h1>Player Dashboard</h1>
-      <UserInfo />
-      <DoctorList />
-
-      {/* Offers Section */}
-    </div>
+    <>
+      <header className="header">
+        <div className="top-bar">
+          <div className="offer">
+            <span>
+              Get a FREE Ayurvedic Consultation | Download Amrutam App
+            </span>
+          </div>
+        </div>
+        <div className="brand">
+          <div className="contact-info">
+            <span className="phone-icon">📞</span>
+            <span className="phone-number">+91 9713171999</span>
+          </div>
+          <h1>AMRUTAM</h1>
+          <div className="login">Login</div>
+        </div>
+      </header>
+      <HeroSec />
+      <CardText />
+      <div>
+        <DoctorList />
+        {/* Offers Section */}
+      </div>
+    </>
   );
 };
 

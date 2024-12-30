@@ -10,6 +10,7 @@ const {
   logout,
   generateFinancialReport,
   getUserInfo,
+  getUser,
 } = require("../Controller/User");
 const router = express.Router();
 
@@ -27,6 +28,8 @@ router.get("/patients-info/:id", authenticateJWT, getUserInfo);
 
 router.patch("/patients/wallet/:id", authenticateJWT, addAmountToWallet);
 router.post("/appointments", bookAppointment);
+
+router.get("/user", getUser);
 
 router.get("/financial-report", generateFinancialReport);
 module.exports = router;

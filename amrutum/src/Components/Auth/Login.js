@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { login, register } from "../Reducer/action"; // Assuming actions are defined in a file
-
+import "./Login.css";
 function Auth() {
   const [isLogin, setIsLogin] = useState(true); // Toggle between Login and Register
   const [email, setEmail] = useState("");
@@ -20,7 +20,7 @@ function Auth() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      history.push("/");
+      history.push("/user");
     }
   }, [isAuthenticated, history]);
 
@@ -43,14 +43,22 @@ function Auth() {
     }
   };
 
+  const handleSwitch = () => {
+    setIsLogin(!isLogin);
+    setEmail("");
+    setPassword("");
+    setName("");
+    setRole("user");
+    setSpecialization("");
+  };
+
   return (
-    <div>
-      <h1>{isLogin ? "Login" : "Register"}</h1>
-      <form onSubmit={handleSubmit}>
-        {/* Name and Role fields for Register only */}
+    <div className="auth-container">
+      <h1 className="auth-title">{isLogin ? "Login" : "Register"}</h1>
+      <form onSubmit={handleSubmit} className="auth-form">
         {!isLogin && (
           <>
-            <div>
+            <div className="form-group">
               <label>Name:</label>
               <input
                 type="text"
@@ -60,7 +68,7 @@ function Auth() {
               />
             </div>
             {role === "doctor" && (
-              <div>
+              <div className="form-group">
                 <label>Specialization:</label>
                 <select
                   value={specialization}
@@ -78,7 +86,7 @@ function Auth() {
             )}
           </>
         )}
-        <div>
+        <div className="form-group">
           <label>Email:</label>
           <input
             type="email"
@@ -87,7 +95,7 @@ function Auth() {
             required
           />
         </div>
-        <div>
+        <div className="form-group">
           <label>Password:</label>
           <input
             type="password"
@@ -96,26 +104,29 @@ function Auth() {
             required
           />
         </div>
-        <div>
+        <div className="form-group">
           <label>Role:</label>
           <select
             value={role}
             onChange={(e) => setRole(e.target.value)}
             required
           >
-            <option value="user">user</option>
+            <option value="user">User</option>
             <option value="doctor">Doctor</option>
           </select>
         </div>
-
-        <button type="submit" disabled={loading}>
+        <button type="submit" className="auth-button" disabled={loading}>
           {loading ? "Submitting..." : isLogin ? "Login" : "Register"}
         </button>
       </form>
-      <button onClick={() => setIsLogin(!isLogin)} disabled={loading}>
+      <button
+        onClick={handleSwitch}
+        className="switch-button"
+        disabled={loading}
+      >
         Switch to {isLogin ? "Register" : "Login"}
       </button>
-      {error && <p style={{ color: "red" }}>Error: {error}</p>}
+      {error && <p className="error-message">Error: {error}</p>}
     </div>
   );
 }

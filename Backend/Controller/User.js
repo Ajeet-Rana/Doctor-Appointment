@@ -70,7 +70,9 @@ const getUserInfo = async (req, res) => {
   const userId = req.params.id;
 
   try {
-    const userinfo = await User.findById(userId).select("name email wallet");
+    const userinfo = await User.findById(userId).select(
+      "name email walletBalance avatarUrl"
+    );
     if (!userinfo) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -137,6 +139,16 @@ const bookAppointment = async (req, res) => {
       finalAmountCharged -= discountApplied;
     }
 
+    if (previousAppointment) {
+      const doctor = await Doctor.findById(doctorId);
+      if (doctor) {
+        console.log("hello");
+        doctor.discountGiven = 0; // Set discountGiven to 0
+        await doctor.save();
+      } else {
+        return res.status(404).json({ message: "Doctor not found" });
+      }
+    }
     const patient = await User.findById(patientId);
     if (!patient) {
       return res.status(404).json({ message: "Patient not found" });
@@ -240,10 +252,22 @@ const generateFinancialReport = async (req, res) => {
   }
 };
 
+const getUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select("-password"); // Exclude password field
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json({ success: true, user });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
-
+  getUser,
   addAmountToWallet,
   bookAppointment,
   logout,

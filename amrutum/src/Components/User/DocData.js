@@ -1,18 +1,20 @@
-// DoctorList.js
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { fetchDoctors } from "../Reducer/action";
-import "./DoctorList.css";
 
 const DoctorList = () => {
   const [specialty, setSpecialty] = useState("");
-  const [displayedDoctors, setDisplayedDoctors] = useState([]);
+  const [displayedDoctors, setDisplayedDoctors] = useState({
+    regularDoctors: [],
+    appointmentDoctors: [],
+  });
   const [showModal, setShowModal] = useState(false);
   const dispatch = useDispatch();
   const doctorData = useSelector((state) => state.doctors);
   const history = useHistory();
-  const userdata = useSelector((state) => state.user.user);
+  const userinfo = useSelector((state) => state.userinfo.userinfo);
+  const appointments = useSelector((state) => state.userinfo.appointments);
 
   useEffect(() => {
     dispatch(fetchDoctors(specialty));
@@ -20,16 +22,32 @@ const DoctorList = () => {
 
   useEffect(() => {
     if (doctorData.doctors) {
-      setDisplayedDoctors(doctorData.doctors.slice(0, 5));
+      const appointmentDoctors = doctorData.doctors.filter((doctor) =>
+        appointments.some(
+          (appointment) => appointment.doctorId._id === doctor._id
+        )
+      );
+
+      const regularDoctors = doctorData.doctors.filter(
+        (doctor) =>
+          !appointments.some(
+            (appointment) => appointment.doctorId._id === doctor._id
+          )
+      );
+
+      setDisplayedDoctors({
+        regularDoctors,
+        appointmentDoctors,
+      });
     }
-  }, [doctorData]);
+  }, [doctorData, appointments]);
 
   const handleSpecialtyChange = (e) => {
     setSpecialty(e.target.value);
   };
 
   const handleBookAppointment = (doctor) => {
-    if (!userdata || Object.keys(userdata ?? {}).length === 0) {
+    if (!userinfo) {
       setShowModal(true);
     } else {
       history.push({
@@ -38,6 +56,7 @@ const DoctorList = () => {
       });
     }
   };
+
   const handleCloseModal = () => {
     setShowModal(false);
   };
@@ -66,19 +85,41 @@ const DoctorList = () => {
       ) : error ? (
         <p>Error: {error}</p>
       ) : (
-        <div className="doctor-list-container">
-          {displayedDoctors.map((doctor) => (
-            <div className="doctor-card" key={doctor.id}>
-              <h2>{doctor.name}</h2>
-              <p>Specialty: {doctor.specialty}</p>
-              <p>Email: {doctor.email}</p>
-              <button onClick={() => handleBookAppointment(doctor)}>
-                Book Appointment
-              </button>
-            </div>
-          ))}
-        </div>
+        <>
+          <h1>Get A Fist Time Appointment and Save HUGE!!</h1>
+          <div className="doctor-list-container">
+            {displayedDoctors.regularDoctors.map((doctor) => (
+              <div className="doctor-card" key={doctor._id}>
+                <h2>{doctor.name}</h2>
+                <p>Specialty: {doctor.specialty}</p>
+                <p>Email: {doctor.email}</p>
+                <button onClick={() => handleBookAppointment(doctor)}>
+                  Book Appointment
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {userinfo && appointments.length > 0 && (
+            <>
+              <h1>Your List of doctors</h1>
+              <div className="doctor-list-container">
+                {displayedDoctors.appointmentDoctors.map((doctor) => (
+                  <div className="doctor-card" key={doctor._id}>
+                    <h2>{doctor.name}</h2>
+                    <p>Specialty: {doctor.specialty}</p>
+                    <p>Email: {doctor.email}</p>
+                    <button onClick={() => handleBookAppointment(doctor)}>
+                      Book Appointment
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </>
       )}
+
       {showModal && (
         <div className="modal">
           <div className="modal-content">

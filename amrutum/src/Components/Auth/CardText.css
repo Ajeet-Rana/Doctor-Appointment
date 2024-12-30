@@ -1,0 +1,120 @@
+.card-container {
+  display: flex;
+
+  justify-content: center;
+  gap: 20px;
+  padding: 6% 2%;
+  box-sizing: border-box;
+}
+
+.card {
+  position: relative;
+  width: 300px;
+  height: 200px;
+  background-color: transparent;
+  padding: 20px;
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+  padding-left: 5rem;
+}
+
+.card p {
+  margin: 10px 0;
+  font-size: 1rem;
+  color: #666;
+}
+
+.card .btn {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #fff;
+  color: #cda274;
+  text-decoration: none;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease;
+}
+
+/* Expanded Card */
+.card.expanded {
+  transform: translateX(10px);
+  height: auto;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.card.expanded p {
+  color: #333;
+}
+
+.card.expanded .btn {
+  background-color: #fff;
+}
+
+.card.expanded .btn:hover {
+  background-color: #333;
+  color: #fff;
+}
+
+@media screen and (max-width: 768px) {
+  .card-container {
+    gap: 15px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .card h2 {
+    font-size: 1.25rem;
+    margin-left: 3rem;
+  }
+
+  .card p {
+    font-size: 0.9rem;
+  }
+
+  .card .btn {
+    font-size: 0.85rem;
+    padding: 8px 16px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .card-container {
+    padding: 4%;
+  }
+
+  .card {
+    width: 90%;
+    margin: 0 auto;
+  }
+
+  .card h2 {
+    font-size: 1.2rem;
+    margin-left: 2rem;
+  }
+
+  .card p {
+    font-size: 0.85rem;
+  }
+
+  .card .btn {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+  }
+}

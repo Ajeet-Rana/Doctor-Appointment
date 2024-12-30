@@ -1,17 +1,20 @@
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { bookAppointment } from "../Reducer/action";
-import { useLocation } from "react-router-dom";
+import { useLocation, useHistory } from "react-router-dom";
+import "./Appointment.css";
 
 const Appointment = () => {
   const location = useLocation();
   const { doctor } = location.state || {};
-  const user = useSelector((state) => state.user.user);
+  const user = useSelector((state) => state.userinfo.userinfo);
   const dispatch = useDispatch();
-  console.log(user);
+  const history = useHistory();
   const [appointmentDate, setAppointmentDate] = useState("");
+  const [showModal, setShowModal] = useState(false);
   const amountCharged = doctor.appointmentCharge;
   const discountApplied = doctor.discountGiven;
+
   const handleSubmit = (event) => {
     event.preventDefault();
     const appointmentData = {
@@ -22,6 +25,12 @@ const Appointment = () => {
       discountApplied,
     };
     dispatch(bookAppointment(appointmentData));
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    history.push("/user");
   };
 
   if (!doctor) {
@@ -29,10 +38,10 @@ const Appointment = () => {
   }
 
   return (
-    <div>
+    <div className="appointment-container">
       <h1>Book Appointment with Dr. {doctor.name}</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
+      <form onSubmit={handleSubmit} className="appointment-form">
+        <div className="form-group">
           <label>Date:</label>
           <input
             type="date"
@@ -41,14 +50,29 @@ const Appointment = () => {
             required
           />
         </div>
-        <div>
-          <label>Amount Charged : {amountCharged}</label>
+        <div className="form-group">
+          <label>Amount Charged: {amountCharged}</label>
         </div>
-        <div>
-          <label>Discount Applied : {discountApplied}</label>
+        <div className="form-group">
+          <label>Discount Applied: {discountApplied}</label>
         </div>
-        <button type="submit">Book Appointment</button>
+        <button type="submit" className="btn">
+          Book Appointment
+        </button>
       </form>
+      {showModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <span className="close" onClick={handleCloseModal}>
+              &times;
+            </span>
+            <p>Your appointment is booked with Dr. {doctor.name}</p>
+            <button onClick={handleCloseModal} className="btn">
+              Go to Dashboard
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
