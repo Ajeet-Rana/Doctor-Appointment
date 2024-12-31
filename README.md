@@ -8,7 +8,7 @@ This project is a web application that allows users to view and book appointment
 - Display a list of doctors, categorized as regular and appointment doctors.
 - Filter doctors by specialization.
 - Book appointments with doctors.
-- Responsive design for mobile-first experience.
+
 
 ## Technologies Used
 
