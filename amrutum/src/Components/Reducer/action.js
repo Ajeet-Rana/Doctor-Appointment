@@ -19,6 +19,9 @@ import {
   FETCH_USER_INFO_REQUEST,
   FETCH_USER_INFO_SUCCESS,
   FETCH_USER_INFO_FAILURE,
+  UPDATE_APPOINTMENT_REQUEST,
+  UPDATE_APPOINTMENT_SUCCESS,
+  UPDATE_APPOINTMENT_FAIL,
 } from "./constants";
 // Login User
 export const login = (email, password, role) => async (dispatch) => {
@@ -38,9 +41,29 @@ export const login = (email, password, role) => async (dispatch) => {
       type: LOGIN_SUCCESS,
       payload: data.user,
     });
-    localStorage.setItem("userId", data.user._id);
-    console.log(data.user._id);
-    dispatch(fetchUserInfo(data.user._id));
+    // Determine role based on user data
+    const userRole = data.user.specialty ? "doctor" : "user";
+
+    // Save user info to localStorage
+    localStorage.setItem(
+      "userInfo",
+      JSON.stringify({
+        userId: data.user._id,
+        role: userRole,
+        specialty: data.user.specialty, // Store specialty only if doctor
+      })
+    );
+
+    // Log user data for debugging
+    console.log(data.user);
+
+    // Fetch user info based on role
+    dispatch(
+      fetchUserInfo({
+        userId: data.user._id,
+        role: userRole,
+      })
+    );
   } catch (error) {
     dispatch({ type: LOGIN_FAIL, payload: error.response.data.message });
   }
@@ -60,6 +83,7 @@ export const register = (userData) => async (dispatch) => {
       type: REGISTER_SUCCESS,
       payload: data.user,
     });
+    console.log(data);
   } catch (error) {
     dispatch({ type: REGISTER_FAIL, payload: error.response.data.message });
   }
@@ -109,13 +133,61 @@ export const fetchFinancialReport = () => async (dispatch) => {
   }
 };
 
-export const fetchUserInfo = (userId) => async (dispatch) => {
-  dispatch({ type: FETCH_USER_INFO_REQUEST });
+export const fetchUserInfo =
+  ({ userId, role }) =>
+  async (dispatch) => {
+    dispatch({ type: FETCH_USER_INFO_REQUEST });
 
-  try {
-    const response = await axios.get(`/api/auth/patients-info/${userId}`);
-    dispatch({ type: FETCH_USER_INFO_SUCCESS, payload: response.data });
-  } catch (error) {
-    dispatch({ type: FETCH_USER_INFO_FAILURE, payload: error.message });
-  }
-};
+    try {
+      console.log(userId, role);
+      const apiRoute =
+        role === "doctor"
+          ? `/api/auth/doctor-info/${userId}`
+          : `/api/auth/patients-info/${userId}`;
+      const response = await axios.get(apiRoute);
+
+      dispatch({
+        type: FETCH_USER_INFO_SUCCESS,
+        payload: response.data,
+      });
+    } catch (error) {
+      dispatch({
+        type: FETCH_USER_INFO_FAILURE,
+        payload: error.message,
+      });
+    }
+  };
+
+export const updateAppointment =
+  (appointmentId, updates) => async (dispatch) => {
+    console.log(appointmentId, updates);
+    try {
+      dispatch({ type: UPDATE_APPOINTMENT_REQUEST });
+
+      const { data } = await axios.patch(
+        `/api/auth/doctor/appointment/${appointmentId}`,
+        updates,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      dispatch({
+        type: UPDATE_APPOINTMENT_SUCCESS,
+        payload: data.appointment,
+      });
+
+      console.log(data.appointment.doctorId);
+      dispatch(
+        fetchUserInfo({
+          userId: data.appointment.doctorId,
+          role: "doctor",
+        })
+      );
+    } catch (error) {
+      dispatch({
+        type: UPDATE_APPOINTMENT_FAIL,
+        payload: error.response.data.message || "Failed to update appointment",
+      });
+    }
+  };

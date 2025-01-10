@@ -7,6 +7,7 @@ import {
   appointmentReducer,
   reportReducer,
   userinfoReducer,
+  appointmentUpdateReducer,
 } from "./Components/Reducer/userReducer";
 
 const middleware = [thunk];
@@ -16,6 +17,7 @@ const reducer = combineReducers({
   appointmentData: appointmentReducer,
   report: reportReducer,
   userinfo: userinfoReducer,
+  appointmentUpdate: appointmentUpdateReducer,
 });
 const store = createStore(
   reducer,

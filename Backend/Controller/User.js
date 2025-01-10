@@ -1,4 +1,5 @@
 // controllers/authController.js
+
 const User = require("../models/User.js");
 const Doctor = require("../models/Doctor.js");
 const Appointment = require("../models/Appoin_model.js");
@@ -119,158 +120,87 @@ const addAmountToWallet = async (req, res) => {
 };
 
 const bookAppointment = async (req, res) => {
-  const {
-    patientId,
-    doctorId,
-    appointmentDate,
-    amountCharged,
-    discountApplied,
-    status = "pending",
-  } = req.body;
+  const { patientId, doctorId, appointmentDate } = req.body;
 
   try {
-    const previousAppointment = await Appointment.findOne({
-      patientId,
-      doctorId,
-    });
-
-    let finalAmountCharged = amountCharged;
-    if (!previousAppointment) {
-      finalAmountCharged -= discountApplied;
+    // Step 1: Validate doctor and patient existence
+    const doctor = await Doctor.findById(doctorId);
+    if (!doctor) {
+      return res.status(404).json({ message: "Doctor not found" });
     }
 
-    if (previousAppointment) {
-      const doctor = await Doctor.findById(doctorId);
-      if (doctor) {
-        console.log("hello");
-        doctor.discountGiven = 0; // Set discountGiven to 0
-        await doctor.save();
-      } else {
-        return res.status(404).json({ message: "Doctor not found" });
-      }
-    }
     const patient = await User.findById(patientId);
     if (!patient) {
       return res.status(404).json({ message: "Patient not found" });
     }
 
+    // Step 2: Check if the doctor is already booked at the same time
+    const existingAppointment = await Appointment.findOne({
+      doctorId,
+      appointmentDate,
+      status: { $ne: "cancelled" },
+    });
+
+    if (existingAppointment) {
+      return res
+        .status(400)
+        .json({ message: "Doctor is already booked at this time" });
+    }
+
+    // Step 3: Check if this is the patient's first appointment with the doctor
+    const previousAppointment = await Appointment.findOne({
+      patientId,
+      doctorId,
+    });
+
+    let discountApplied = 0;
+    if (!previousAppointment) {
+      discountApplied = doctor.discountGiven;
+    }
+    // Step 4: Calculate final amount charged
+    const finalAmountCharged =
+      doctor.appointmentCharge - discountApplied > 0
+        ? doctor.appointmentCharge - discountApplied
+        : 0;
+
+    // Step 5: Check if the patient has enough wallet balance
     if (patient.walletBalance < finalAmountCharged) {
       return res.status(400).json({ message: "Insufficient wallet balance" });
     }
 
+    // Step 6: Deduct amount from patient's wallet
     patient.walletBalance -= finalAmountCharged;
     await patient.save();
 
+    // Step 7: Create and save the new appointment
     const newAppointment = new Appointment({
       patientId,
       doctorId,
       appointmentDate,
       amountCharged: finalAmountCharged,
-      discountApplied: !previousAppointment ? discountApplied : 0,
-      status,
+      discountApplied,
+      status: "pending",
     });
 
     await newAppointment.save();
+
+    // Step 8: Send success response
     res.status(201).json({
       message: "Appointment created successfully",
       appointment: newAppointment,
     });
   } catch (error) {
+    // Handle errors
     res
       .status(500)
       .json({ message: "Error creating appointment", error: error.message });
   }
 };
 
-const logout = async (req, res) => {
-  res.cookie("token", null, {
-    expires: new Date(Date.now()),
-    httpOnly: true,
-    sameSite: "None",
-    secure: true,
-  });
-
-  res.status(200).json({
-    success: true,
-    message: "Logged Out",
-  });
-};
-
-const generateFinancialReport = async (req, res) => {
-  try {
-    const report = await Appointment.aggregate([
-      {
-        $lookup: {
-          from: "patients",
-          localField: "patientId",
-          foreignField: "_id",
-          as: "patient",
-        },
-      },
-      {
-        $lookup: {
-          from: "doctors",
-          localField: "doctorId",
-          foreignField: "_id",
-          as: "doctor",
-        },
-      },
-      {
-        $unwind: "$patient",
-      },
-      {
-        $unwind: "$doctor",
-      },
-      {
-        $group: {
-          _id: {
-            doctor: "$doctorId",
-            patient: "$patientId",
-          },
-          totalAmountCharged: { $sum: "$amountCharged" },
-          totalDiscountApplied: { $sum: "$discountApplied" },
-          totalAppointments: { $sum: 1 },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          doctorId: "$_id.doctor",
-          patientId: "$_id.patient",
-          totalAmountCharged: 1,
-          totalDiscountApplied: 1,
-          totalAppointments: 1,
-        },
-      },
-    ]);
-
-    res.status(200).json({ report });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error generating report", error: error.message });
-  }
-};
-
-const getUser = async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id).select("-password"); // Exclude password field
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    res.status(200).json({ success: true, user });
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error });
-  }
-};
-
 module.exports = {
   registerUser,
   loginUser,
-  getUser,
   addAmountToWallet,
   bookAppointment,
-  logout,
-  generateFinancialReport,
   getUserInfo,
 };

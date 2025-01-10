@@ -9,12 +9,12 @@ const appointmentSchema = new Schema(
     },
     patientId: {
       type: Schema.Types.ObjectId,
-      ref: "Patient",
+      ref: "User",
+      required: true,
     },
     doctorId: {
       type: Schema.Types.ObjectId,
       ref: "Doctor",
-      type: String,
       required: true,
     },
     appointmentDate: {
@@ -31,7 +31,7 @@ const appointmentSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["completed", "pending", "cancelled"],
+      enum: ["confirmed", "pending", "cancelled"],
       default: "pending",
     },
     createdAt: {

@@ -1,16 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchUserInfo } from "../Reducer/action";
+import { fetchUserInfo, updateAppointment } from "../Reducer/action";
 import Loading from "../Auth/Loading";
-import "./UserInfo.css";
-import DoctorList from "./DocData";
+import DoctorEarnings from "./doctorUpdate";
+import "../User/UserInfo.css"; // Reuse the same CSS file for styling
 
-const UserInfo = () => {
+const DoctorInfo = () => {
   const dispatch = useDispatch();
   const [showAll, setShowAll] = useState(false);
-  const { loading, userinfo, appointments, error } = useSelector(
+
+  const { loading, userinfo, appointments } = useSelector(
     (state) => state.userinfo
   );
+
+  // Update function with flexible field updates
+  const handleUpdate = (appointmentId, updates) => {
+    dispatch(updateAppointment(appointmentId, updates));
+  };
+
   useEffect(() => {
     const userdataString = localStorage.getItem("userInfo");
     const userdata = userdataString ? JSON.parse(userdataString) : null;
@@ -25,9 +32,9 @@ const UserInfo = () => {
   }, [dispatch]);
 
   if (loading) return <Loading />;
-  if (error) return <p className="error-message">Error: {error}</p>;
+
   if (!userinfo)
-    return <p className="info-message">No user information found.</p>;
+    return <p className="info-message">No doctor information found.</p>;
 
   const displayedAppointments = showAll
     ? appointments
@@ -35,10 +42,10 @@ const UserInfo = () => {
 
   return (
     <div className="dashboard-container">
-      <h1 className="dashboard-title">User Dashboard</h1>
+      <h1 className="dashboard-title">Doctor Dashboard</h1>
 
       <div className="dashboard-cards">
-        {/* User Information Card */}
+        {/* Doctor Information Card */}
         <div className="card user-info-card">
           {userinfo.avatarUrl && (
             <img
@@ -54,24 +61,20 @@ const UserInfo = () => {
             <strong>Email:</strong> {userinfo.email}
           </p>
           <p>
-            <strong>Wallet Balance:</strong> ${userinfo.walletBalance}
+            <strong>Specialty:</strong> {userinfo.specialty}
           </p>
         </div>
 
         {/* Appointments Section */}
         <div className="card appointments-card">
-          <h2>Appointments</h2>
+          <h2>Upcoming Appointments</h2>
           {appointments.length > 0 ? (
             <>
               <div className="appointments-container">
                 {displayedAppointments.map((appointment) => (
                   <div key={appointment._id} className="appointment-card">
                     <p>
-                      <strong>Doctor:</strong> {appointment.doctorId.name}
-                    </p>
-                    <p>
-                      <strong>Specialty:</strong>{" "}
-                      {appointment.doctorId.specialty}
+                      <strong>Patient:</strong> {appointment.patientId.name}
                     </p>
                     <p>
                       <strong>Date:</strong>{" "}
@@ -80,6 +83,16 @@ const UserInfo = () => {
                     <p>
                       <strong>Status:</strong> {appointment.status}
                     </p>
+                    {/* Mark as Complete Button */}
+                    {appointment.status !== "complete" && (
+                      <button
+                        onClick={() =>
+                          handleUpdate(appointment._id, { status: "confirmed" })
+                        }
+                      >
+                        Confirm
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -98,9 +111,9 @@ const UserInfo = () => {
           )}
         </div>
       </div>
-      <DoctorList />
+      <DoctorEarnings appointments={appointments} userinfo={userinfo} />
     </div>
   );
 };
 
-export default UserInfo;
+export default DoctorInfo;

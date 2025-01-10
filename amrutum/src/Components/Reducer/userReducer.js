@@ -17,31 +17,52 @@ import {
   FETCH_USER_INFO_REQUEST,
   FETCH_USER_INFO_SUCCESS,
   FETCH_USER_INFO_FAILURE,
+  UPDATE_APPOINTMENT_REQUEST,
+  UPDATE_APPOINTMENT_SUCCESS,
+  UPDATE_APPOINTMENT_FAIL,
 } from "./constants";
 
 export const userReducer = (state = { user: {} }, action) => {
   switch (action.type) {
     case LOGIN_REQUEST:
-    case REGISTER_REQUEST:
       return {
         loading: true,
         isAuthenticated: false,
       };
+
+    case REGISTER_REQUEST:
+      return {
+        loading: true,
+        registersuccess: false,
+      };
     case LOGIN_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        user: action.payload,
+        isAuthenticated: true,
+      };
     case REGISTER_SUCCESS:
       return {
         ...state,
         loading: false,
-        isAuthenticated: true,
         user: action.payload,
+        registersuccess: true,
       };
     case LOGIN_FAIL:
+      return {
+        ...state,
+        loading: false,
+        user: null,
+        isAuthenticated: false,
+        error: action.payload,
+      };
     case REGISTER_FAIL:
       return {
         ...state,
         loading: false,
-        isAuthenticated: false,
         user: null,
+        registersuccess: false,
         error: action.payload,
       };
 
@@ -105,6 +126,25 @@ export const userinfoReducer = (
       };
     case FETCH_USER_INFO_FAILURE:
       return { ...state, loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
+export const appointmentUpdateReducer = (
+  state = { appointment: {} },
+  action
+) => {
+  switch (action.type) {
+    case UPDATE_APPOINTMENT_REQUEST:
+      return { ...state, loading: true };
+
+    case UPDATE_APPOINTMENT_SUCCESS:
+      return { ...state, loading: false, appointment: action.payload };
+
+    case UPDATE_APPOINTMENT_FAIL:
+      return { ...state, loading: false, error: action.payload };
+
     default:
       return state;
   }

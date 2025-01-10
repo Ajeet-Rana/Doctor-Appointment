@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { bookAppointment } from "../Reducer/action";
 import { useLocation, useHistory } from "react-router-dom";
@@ -7,23 +7,41 @@ import "./Appointment.css";
 const Appointment = () => {
   const location = useLocation();
   const { doctor } = location.state || {};
-  const user = useSelector((state) => state.userinfo.userinfo);
+  const userInfo = useSelector((state) => state.userinfo);
+  const user = userInfo.userinfo;
   const dispatch = useDispatch();
   const history = useHistory();
   const [appointmentDate, setAppointmentDate] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const amountCharged = doctor.appointmentCharge;
-  const discountApplied = doctor.discountGiven;
+  const [discount, setDiscount] = useState(doctor.discountGiven); // Default discount
+  const [hasBookedBefore, setHasBookedBefore] = useState(false);
+
+  const amountCharged = doctor.appointmentCharge - discount;
+
+  useEffect(() => {
+    const bookedBefore = userInfo.appointments.some(
+      (appointment) => appointment.doctorId._id === doctor._id
+    );
+    setHasBookedBefore(bookedBefore);
+  }, [userInfo.appointments, doctor._id]);
+
+  useEffect(() => {
+    if (hasBookedBefore) {
+      setDiscount(0); // No discount for repeat bookings
+    }
+  }, [hasBookedBefore]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
+
     const appointmentData = {
       patientId: user._id,
       doctorId: doctor._id,
       appointmentDate,
-      amountCharged,
-      discountApplied,
+      amountCharged: doctor.appointmentCharge,
+      discountApplied: discount,
     };
+
     dispatch(bookAppointment(appointmentData));
     setShowModal(true);
   };
@@ -54,7 +72,7 @@ const Appointment = () => {
           <label>Amount Charged: {amountCharged}</label>
         </div>
         <div className="form-group">
-          <label>Discount Applied: {discountApplied}</label>
+          <label>Discount Applied: {discount}</label>
         </div>
         <button type="submit" className="btn">
           Book Appointment
@@ -66,7 +84,12 @@ const Appointment = () => {
             <span className="close" onClick={handleCloseModal}>
               &times;
             </span>
-            <p>Your appointment is booked with Dr. {doctor.name}</p>
+            <p>
+              Your appointment is booked with Dr. {doctor.name}.{" "}
+              {discount > 0
+                ? "You received a discount!"
+                : "No discount applied."}
+            </p>
             <button onClick={handleCloseModal} className="btn">
               Go to Dashboard
             </button>

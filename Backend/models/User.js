@@ -27,6 +27,8 @@ const userSchema = new mongoose.Schema(
     },
     avatarUrl: {
       type: String,
+      default:
+        "https://i.ibb.co/8XN2nK0/First-Peach-Color-Palette-color-hex-com.png",
     },
     createdAt: {
       type: Date,

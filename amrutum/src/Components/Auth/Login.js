@@ -10,20 +10,51 @@ function Auth() {
   const [name, setName] = useState(""); // For Register only
   const [role, setRole] = useState("user"); // Default role is "user"
   const [specialization, setSpecialization] = useState(""); // For Doctor only
-
+  const [successMessage, setSuccessMessage] = useState(""); // For success message
   const dispatch = useDispatch();
   const history = useHistory();
   // Redux state values
-  const { loading, error, isAuthenticated } = useSelector(
+  const { loading, error, isAuthenticated, registersuccess } = useSelector(
     (state) => state.user
   );
 
   useEffect(() => {
     if (isAuthenticated) {
-      history.push("/user");
+      // Retrieve userInfo from local storage
+      const userInfo = localStorage.getItem("userInfo");
+
+      if (userInfo) {
+        const parsedUserInfo = JSON.parse(userInfo);
+
+        // Redirect based on role
+        if (parsedUserInfo.role === "doctor") {
+          history.push("/doctor");
+        } else if (parsedUserInfo.role === "user") {
+          history.push("/user");
+        } else {
+          console.error("Invalid role found in userInfo");
+        }
+      } else {
+        console.error("No userInfo found in local storage");
+      }
     }
   }, [isAuthenticated, history]);
 
+  useEffect(() => {
+    if (registersuccess) {
+      setSuccessMessage("Registered successfully! Please login.");
+      setIsLogin(true); // Switch to login form
+      resetForm(); // Clear form fields
+    }
+  }, [registersuccess]);
+
+  const resetForm = () => {
+    setEmail("");
+    setPassword("");
+    setName("");
+    setRole("user");
+    setSpecialization("");
+  };
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -45,16 +76,16 @@ function Auth() {
 
   const handleSwitch = () => {
     setIsLogin(!isLogin);
-    setEmail("");
-    setPassword("");
-    setName("");
-    setRole("user");
-    setSpecialization("");
+    resetForm();
+    setSuccessMessage(""); // Clear success message on switching
   };
 
   return (
     <div className="auth-container">
       <h1 className="auth-title">{isLogin ? "Login" : "Register"}</h1>
+      {/* Success message */}
+      {successMessage && <p className="success-message">{successMessage}</p>}
+
       <form onSubmit={handleSubmit} className="auth-form">
         {!isLogin && (
           <>

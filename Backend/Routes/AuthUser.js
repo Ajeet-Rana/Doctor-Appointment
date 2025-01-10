@@ -7,11 +7,9 @@ const {
   registerUser,
   addAmountToWallet,
   bookAppointment,
-  logout,
-  generateFinancialReport,
   getUserInfo,
-  getUser,
 } = require("../Controller/User");
+const { getDoctorInfo, updateAppointment } = require("../Controller/Doctor");
 const router = express.Router();
 
 // Register route
@@ -20,16 +18,17 @@ router.post("/register", registerUser);
 // Login route
 router.post("/login", loginUser);
 
-// User
-router.get("/logout", logout);
-
-// Patient Data route
+// Patient / Doctor Data route
 router.get("/patients-info/:id", authenticateJWT, getUserInfo);
+router.get("/doctor-info/:id", authenticateJWT, getDoctorInfo);
 
+// Adding money to patients wallet
 router.patch("/patients/wallet/:id", authenticateJWT, addAmountToWallet);
+
+// Appointment Booking
 router.post("/appointments", bookAppointment);
 
-router.get("/user", getUser);
+// Updating Appointment
+router.patch("/doctor/appointment/:id", updateAppointment);
 
-router.get("/financial-report", generateFinancialReport);
 module.exports = router;

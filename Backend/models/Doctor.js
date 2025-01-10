@@ -13,6 +13,10 @@ const doctorSchema = new Schema(
       type: String,
       required: true,
     },
+    avatarUrl: {
+      type: String,
+      default: "https://i.ibb.co/yPRkR94/user.webp",
+    },
     specialty: {
       type: String,
       required: true,
